@@ -50,4 +50,4 @@ USER nestjs
 EXPOSE 3000
 
 # Start the server using the production build
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
