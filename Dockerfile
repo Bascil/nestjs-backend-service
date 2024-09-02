@@ -50,7 +50,7 @@ COPY --from=builder /app/package.json ./package.json
 USER nestjs
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 8080
 
 # Start the server using the production build
 CMD ["node", "dist/main.js"]
