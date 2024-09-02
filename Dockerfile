@@ -1,51 +1,56 @@
-# Development stage
-FROM node:20-alpine3.18 as development
+# Stage 1: Dependencies
+FROM node:18-alpine AS deps
+WORKDIR /app
 
-ENV NODE_ENV=development
-ENV TZ=Africa/Nairobi
-WORKDIR /usr/src/app
+# Install dependencies for native builds
+RUN apk add --no-cache libc6-compat
 
-COPY package.json tsconfig.json nest-cli.json  ./
+# Copy package files
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+
+# Install dependencies
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
+
+# Stage 2: Builder
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# TODO complete for tests
-RUN touch .env
+# Build the application
+RUN npm run build
 
-RUN npm install -g pnpm && \
-    pnpm install && \
-    pnpx prisma generate && \
-    pnpm run build && \
-    rm -rf /usr/src/app/node_modules && \
-    pnpm i --prod && \
-    pnpx prisma generate && \
-    rm -rf /usr/src/app/node_modules/.pnpm/webpack* && \
-    rm -rf /usr/src/app/node_modules/.pnpm/typescript* && \
-    rm -rf /usr/src/app/node_modules/.pnpm/swagger-ui-dist* && \
-    rm /usr/src/app/node_modules/.pnpm/fontkit@1.9.0/node_modules/fontkit/dist/main.cjs.map && \
-    rm /usr/src/app/node_modules/.pnpm/fontkit@1.9.0/node_modules/fontkit/dist/module.mjs.map && \
-    # rm -rf /usr/src/app/node_modules/.pnpm/protobufjs* && \
-    rm -rf /usr/src/app/node_modules/.pnpm/@types* 
+# Remove development dependencies
+RUN npm prune --production
 
-# Production stage
-FROM node:20-alpine3.18 as production
+# Stage 3: Runner
+FROM node:18-alpine AS runner
+WORKDIR /app
 
-ENV TZ=Africa/Nairobi
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+# Set to production environment
+ENV NODE_ENV production
 
-WORKDIR /usr/src/app
+# Create a non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nestjs
 
-RUN npm install -g pnpm
+# Copy necessary files from builder stage
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 
-COPY package.json tsconfig.json nest-cli.json ./
-COPY --from=development /usr/src/app/dist ./dist
-COPY --from=development /usr/src/app/prisma ./prisma
-COPY --from=development /usr/src/app/node_modules ./node_modules
-COPY --from=development /usr/src/app/storage/assets ./storage/assets
+# Switch to non-root user
+USER nestjs
 
-# RUN du -hsc *
-RUN cd node_modules/.pnpm && du -hsc *
+# Expose the port the app runs on
+EXPOSE 3000
 
-EXPOSE 8080
-CMD ["pnpm", "run", "start:prod"]
-
+# Start the server using the production build
+CMD ["node", "dist/main.js"]
