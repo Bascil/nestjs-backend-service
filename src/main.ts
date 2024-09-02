@@ -4,6 +4,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const port = process.env.PORT || 3000;
 
   // Set a global prefix
   app.setGlobalPrefix('api');
@@ -16,6 +17,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  await app.listen(8000);
+
+  await app.listen(port);
 }
 bootstrap();

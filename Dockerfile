@@ -20,15 +20,12 @@ RUN \
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy dependencies from deps stage
+# Copy dependencies and source files
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build the application
 RUN npm run build
-
-# Remove development dependencies
-RUN npm prune --production
 
 # Stage 3: Runner
 FROM node:18-alpine AS runner
@@ -41,16 +38,16 @@ ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
 
-# Copy necessary files from builder stage
+# Copy built application
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
 
 # Switch to non-root user
 USER nestjs
 
 # Expose the port the app runs on
-EXPOSE 8080
+EXPOSE 3000
 
 # Start the server using the production build
 CMD ["node", "dist/main.js"]
