@@ -7,6 +7,7 @@ RUN apk add --no-cache libc6-compat
 
 # Copy package files
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+COPY prisma ./prisma/
 
 # Install dependencies
 RUN \
@@ -16,12 +17,16 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
+# Generate Prisma client
+RUN npx prisma generate
+
 # Stage 2: Builder
 FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Copy dependencies and source files
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/prisma ./prisma
 COPY . .
 
 # Build the application
@@ -42,6 +47,7 @@ RUN adduser --system --uid 1001 nestjs
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
 
 # Switch to non-root user
 USER nestjs
