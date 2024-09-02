@@ -5,7 +5,7 @@ ENV NODE_ENV=development
 ENV TZ=Africa/Nairobi
 WORKDIR /usr/src/app
 
-COPY package.json pnpm-lock.yaml tsconfig.json nest-cli.json  ./
+COPY package.json tsconfig.json nest-cli.json  ./
 COPY . .
 
 # TODO complete for tests
@@ -37,7 +37,7 @@ WORKDIR /usr/src/app
 
 RUN npm install -g pnpm
 
-COPY package.json pnpm-lock.yaml tsconfig.json nest-cli.json ./
+COPY package.json tsconfig.json nest-cli.json ./
 COPY --from=development /usr/src/app/dist ./dist
 COPY --from=development /usr/src/app/prisma ./prisma
 COPY --from=development /usr/src/app/node_modules ./node_modules
