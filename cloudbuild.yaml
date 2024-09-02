@@ -48,7 +48,7 @@ steps:
       - '--max-instances'
       - '1'
       - '--memory'
-      - '512Mi'
+      - '256Mi'
 
 images:
   - 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA'
