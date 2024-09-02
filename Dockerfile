@@ -5,9 +5,10 @@ WORKDIR /app
 # Install dependencies for native builds
 RUN apk add --no-cache libc6-compat
 
-# Copy package files
+# Copy package files and prisma schema
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 COPY prisma ./prisma/
+COPY .env ./
 
 # Install dependencies
 RUN \
@@ -27,6 +28,7 @@ WORKDIR /app
 # Copy dependencies and source files
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/prisma ./prisma
+COPY --from=deps /app/.env ./.env
 COPY . .
 
 # Build the application
@@ -48,6 +50,7 @@ COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nestjs:nodejs /app/.env ./.env
 
 # Switch to non-root user
 USER nestjs
