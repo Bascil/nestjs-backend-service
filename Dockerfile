@@ -1,40 +1,51 @@
-# Stage 1: Build the NestJS application
-FROM node:20-alpine AS builder
+# Development stage
+FROM node:20-alpine3.18 as development
 
-# Set working directory
-WORKDIR /app
+ENV NODE_ENV=development
+ENV TZ=Africa/Nairobi
+WORKDIR /usr/src/app
 
-# Install dependencies based on the preferred package manager (npm or yarn)
-COPY package*.json ./
-RUN npm ci --only=production
-
-# Copy all necessary files for the build
+COPY package.json pnpm-lock.yaml tsconfig.json nest-cli.json  ./
 COPY . .
 
-# Build the NestJS project
-RUN npm run build
+# TODO complete for tests
+RUN touch .env
 
-# Stage 2: Create the final image with the production build
-FROM node:20-alpine AS runner
+RUN npm install -g pnpm && \
+    pnpm install && \
+    pnpx prisma generate && \
+    pnpm run build && \
+    rm -rf /usr/src/app/node_modules && \
+    pnpm i --prod && \
+    pnpx prisma generate && \
+    rm -rf /usr/src/app/node_modules/.pnpm/webpack* && \
+    rm -rf /usr/src/app/node_modules/.pnpm/typescript* && \
+    rm -rf /usr/src/app/node_modules/.pnpm/swagger-ui-dist* && \
+    rm /usr/src/app/node_modules/.pnpm/fontkit@1.9.0/node_modules/fontkit/dist/main.cjs.map && \
+    rm /usr/src/app/node_modules/.pnpm/fontkit@1.9.0/node_modules/fontkit/dist/module.mjs.map && \
+    # rm -rf /usr/src/app/node_modules/.pnpm/protobufjs* && \
+    rm -rf /usr/src/app/node_modules/.pnpm/@types* 
 
-# Set working directory
-WORKDIR /app
+# Production stage
+FROM node:20-alpine3.18 as production
 
-# Install only production dependencies
-COPY package*.json ./
-RUN npm ci --only=production
+ENV TZ=Africa/Nairobi
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
-# Copy the build from the builder stage
-COPY --from=builder /app/dist ./dist
+WORKDIR /usr/src/app
 
-# Copy any other necessary files (e.g., configuration files)
-COPY --from=builder /app/.env ./
+RUN npm install -g pnpm
 
-# Expose the application port (ensure this matches your app configuration)
-EXPOSE 3000
+COPY package.json pnpm-lock.yaml tsconfig.json nest-cli.json ./
+COPY --from=development /usr/src/app/dist ./dist
+COPY --from=development /usr/src/app/prisma ./prisma
+COPY --from=development /usr/src/app/node_modules ./node_modules
+COPY --from=development /usr/src/app/storage/assets ./storage/assets
 
-# Define the command to run the app
-CMD ["node", "dist/main"]
+# RUN du -hsc *
+RUN cd node_modules/.pnpm && du -hsc *
 
-# Optional: Set the NODE_ENV to production for better performance
-ENV NODE_ENV=production
+EXPOSE 8080
+CMD ["pnpm", "run", "start:prod"]
+
