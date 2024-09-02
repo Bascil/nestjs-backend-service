@@ -9,7 +9,11 @@ steps:
         DATABASE_URL=${_DATABASE_URL}
         MYSQL_PRISMA_URL=${_MYSQL_PRISMA_URL}
         MYSQL_URL_NON_POOLING=${_MYSQL_URL_NON_POOLING}
+        JWT_SECRET=${_JWT_SECRET}
+        JWT_EXPIRES_IN=${_JWT_EXPIRES_IN}
+        TOKEN_TYPE=${_TOKEN_TYPE}
         EOF
+
   # Remove any trailing whitespace and empty lines
   - name: 'bash'
     entrypoint: 'bash'
@@ -47,6 +51,13 @@ steps:
       - '--memory'
       - '256Mi'
       - '--set-env-vars'
-      - 'DATABASE_URL=${_DATABASE_URL},MYSQL_PRISMA_URL=${_MYSQL_PRISMA_URL},MYSQL_URL_NON_POOLING=${_MYSQL_URL_NON_POOLING}'
+      - |
+        DATABASE_URL=${_DATABASE_URL}
+        MYSQL_PRISMA_URL=${_MYSQL_PRISMA_URL}
+        MYSQL_URL_NON_POOLING=${_MYSQL_URL_NON_POOLING}
+        JWT_SECRET=${_JWT_SECRET}
+        JWT_EXPIRES_IN=${_JWT_EXPIRES_IN}
+        TOKEN_TYPE=${_TOKEN_TYPE}
+
 images:
   - 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA'
