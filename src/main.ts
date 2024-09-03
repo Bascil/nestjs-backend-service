@@ -21,7 +21,7 @@ async function bootstrap() {
 
   // Configure CORS options
   const corsOptions: CorsOptions = {
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000', 'https://vue-crm-frontend.netlify.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true, // Allow cookies to be sent with the request
   };
