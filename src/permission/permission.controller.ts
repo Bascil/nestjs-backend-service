@@ -13,7 +13,7 @@ import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { Permission } from '../auth/permission/permission.decorator';
 
 @Controller({
-  path: 'permission',
+  path: 'permissions',
   version: '1',
 })
 export class PermissionController {

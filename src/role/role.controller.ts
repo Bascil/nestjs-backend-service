@@ -13,7 +13,7 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { Permission } from '../auth/permission/permission.decorator';
 
 @Controller({
-  path: 'role',
+  path: 'roles',
   version: '1',
 })
 export class RoleController {
