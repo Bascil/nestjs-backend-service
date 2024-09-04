@@ -47,11 +47,11 @@ steps:
       - '--port'
       - '3000'
       - '--min-instances'
-      - '0'
+      - '1'
       - '--max-instances'
       - '1'
       - '--memory'
-      - '256Mi'
+      - '512Mi'
       - '--set-env-vars'
       - |
         DATABASE_URL=${_DATABASE_URL}
