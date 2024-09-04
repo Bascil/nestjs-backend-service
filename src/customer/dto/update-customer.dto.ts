@@ -18,4 +18,13 @@ export class UpdateCustomerDto extends PartialType(CreateCustomerDto) {
 
   @IsOptional()
   address: string;
+
+  @IsOptional()
+  id: string;
+
+  @IsOptional()
+  createdAt: Date;
+
+  @IsOptional()
+  updatedAt: Date;
 }

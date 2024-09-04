@@ -21,4 +21,13 @@ export class UpdateLeadDto extends PartialType(CreateLeadDto) {
 
   @IsNotEmpty()
   source: string;
+
+  @IsOptional()
+  id: string;
+
+  @IsOptional()
+  createdAt: Date;
+
+  @IsOptional()
+  updatedAt: Date;
 }

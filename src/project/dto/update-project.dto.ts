@@ -17,4 +17,13 @@ export class UpdateProjectDto extends PartialType(CreateProjectDto) {
 
   @IsOptional()
   endDate: Date;
+
+  @IsOptional()
+  createdAt: Date;
+
+  @IsOptional()
+  updatedAt: Date;
+
+  @IsOptional()
+  id: string;
 }
