@@ -32,21 +32,21 @@ export class ProjectController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin, Role.Manager)
+  @Roles(Role.Admin, Role.Manager, Role.Engineer)
   findAll(@Query('page') page = 1, @Query('perPage') limit = 10) {
     return this.projectService.findAll(+page, +limit);
   }
 
   @Get(':id')
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin, Role.Manager)
+  @Roles(Role.Admin, Role.Manager, Role.Engineer)
   findOne(@Param('id') id: string) {
     return this.projectService.getProjectById(id);
   }
 
   @Patch(':id')
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin, Role.Manager)
+  @Roles(Role.Admin, Role.Manager, Role.Engineer)
   update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
     return this.projectService.updateProject(id, updateProjectDto);
   }

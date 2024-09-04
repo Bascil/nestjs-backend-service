@@ -25,34 +25,35 @@ export class TaskController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Manager, Role.Engineer)
   create(@Body() createTaskDto: CreateTaskDto) {
     return this.taskService.createTask(createTaskDto);
   }
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin, Role.Manager)
+  @Roles(Role.Admin, Role.Manager, Role.Engineer)
   findAll(@Query('page') page = 1, @Query('perPage') limit = 10) {
     return this.taskService.findAll(+page, +limit);
   }
 
   @Get(':id')
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin, Role.Manager)
+  @Roles(Role.Admin, Role.Manager, Role.Engineer)
   findOne(@Param('id') id: string) {
     return this.taskService.getTaskById(id);
   }
 
   @Patch(':id')
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin, Role.Manager)
+  @Roles(Role.Admin, Role.Manager, Role.Engineer)
   update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
     return this.taskService.updateTask(id, updateTaskDto);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
+  @Roles(Role.Admin, Role.Manager, Role.Engineer)
   @Roles(Role.Admin, Role.Manager)
   remove(@Param('id') id: string) {
     return this.taskService.deleteTask(id);
