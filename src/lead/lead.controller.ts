@@ -34,7 +34,7 @@ export class LeadController {
   @UseGuards(RolesGuard)
   @Roles(Role.Admin, Role.Manager)
   findAll(@Query('page') page = 1, @Query('perPage') limit = 10) {
-    return this.leadService.findAll(page, limit);
+    return this.leadService.findAll(+page, +limit);
   }
 
   @Get(':id')

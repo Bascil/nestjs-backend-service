@@ -34,7 +34,7 @@ export class CustomerController {
   @UseGuards(RolesGuard)
   @Roles(Role.Admin, Role.Manager)
   findAll(@Query('page') page = 1, @Query('perPage') limit = 10) {
-    return this.customerService.findAll(page, limit);
+    return this.customerService.findAll(+page, +limit);
   }
 
   @Get(':id')
