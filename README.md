@@ -1,6 +1,6 @@
 # nestjs-backend-service
 
-Backend service built with NestJs 10. Includes unit tests and benchmarking tools to ensure robustness and efficiency.
+Backend service built with NestJs 10. Includes unit tests to ensure robustness and efficiency.
 
 ### Features
 
