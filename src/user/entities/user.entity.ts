@@ -5,6 +5,7 @@ export class User {
   phoneNumber?: string;
   taxPin?: string;
   email: string;
+  roleId: string;
   password?: string;
   emailVerifiedAt: Date;
   isActive: boolean;

@@ -1,186 +1,165 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from '../prisma.service';
+import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
-@Injectable()
+const prisma = new PrismaClient();
+
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  async findAll(page: number = 1, pageSize: number = 10) {
+    const skip = (page - 1) * pageSize;
 
-  async create(createUserDto: CreateUserDto) {
-    if (await this.findByEmail(createUserDto.email)) {
-      throw new ConflictException('Email is exist');
-    }
-    const user = await this.prisma.user.create({
-      data: {
-        ...createUserDto,
-        password: await hash(createUserDto.password, 10),
-      },
-    });
-    const { password, ...result } = user;
-    return result;
-  }
-
-  async findAll() {
-    const users = await this.prisma.user.findMany({
-      orderBy: { createdAt: 'desc' },
+    // Fetching users with their associated role
+    const users = await prisma.user.findMany({
+      skip: skip,
+      take: pageSize,
       select: {
         id: true,
         firstName: true,
         lastName: true,
+        email: true,
         phoneNumber: true,
         taxPin: true,
-        email: true,
-        isActive: true,
-        emailVerifiedAt: true,
-        createdAt: true,
-        updatedAt: true,
-        user_role: {
+        role: {
           select: {
-            roles: {
-              select: {
-                id: true,
-                name: true,
-                role_permission: {
-                  select: {
-                    permissions: {
-                      select: {
-                        name: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
+            id: true,
+            name: true,
+            permissions: true,
           },
         },
       },
     });
 
+    // Counting total users for pagination
+    const totalUsers = await prisma.user.count();
+    const totalPages = Math.ceil(totalUsers / pageSize);
+
+    // Structuring the response to include role name
     const formattedUsers = users.map((user) => ({
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
+      email: user.email,
       phoneNumber: user.phoneNumber,
       taxPin: user.taxPin,
-      email: user.email,
-      isActive: user.isActive,
-      emailVerifiedAt: user.emailVerifiedAt,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      roles: user.user_role.map((userRole) => ({
-        name: userRole.roles.name,
-        permissions: userRole.roles.role_permission.map(
-          (rolePermission) => rolePermission.permissions.name,
-        ),
-      })),
+      roleId: user.role.id,
+      roleName: user.role.name,
+      permissions: user.role.permissions,
     }));
 
-    return formattedUsers;
+    return {
+      data: formattedUsers, // Moving users to data field
+      meta: {
+        from: skip + 1,
+        to: skip + users.length,
+        total: totalUsers,
+        perPage: pageSize,
+        lastPage: totalPages,
+        currentPage: page,
+        prevPage: page > 1 ? page - 1 : null,
+        nextPage: page < totalPages ? page + 1 : null,
+      },
+    };
   }
 
-  async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
+  async getUserById(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
       select: {
         id: true,
         firstName: true,
         lastName: true,
+        email: true,
         phoneNumber: true,
         taxPin: true,
-        email: true,
-        emailVerifiedAt: true,
-        createdAt: true,
-        updatedAt: true,
-        user_role: {
+        role: {
           select: {
-            roles: {
-              select: {
-                id: true,
-                name: true,
-                role_permission: {
-                  select: {
-                    permissions: {
-                      select: {
-                        name: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
+            id: true,
+            name: true, // Including role name
           },
         },
       },
     });
+
     if (!user) {
-      throw new NotFoundException(`The data with id ${id} is not found`);
+      throw new Error('User not found');
     }
-    const result = {
+
+    return {
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
+      email: user.email,
       phoneNumber: user.phoneNumber,
       taxPin: user.taxPin,
-      email: user.email,
-      emailVerifiedAt: user.emailVerifiedAt,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      roles: user.user_role.map((userRole) => ({
-        name: userRole.roles.name,
-        permissions: userRole.roles.role_permission.map(
-          (rolePermission) => rolePermission.permissions.name,
-        ),
-      })),
+      roleId: user.role.id,
+      roleName: user.role.name, // Adding role name to the response
     };
-    return result;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-    });
-    if (!user) {
-      throw new NotFoundException(`The data with id ${id} is not found`);
-    }
-
-    if (updateUserDto.email != user.email) {
-      if (await this.findByEmail(updateUserDto.email)) {
-        throw new ConflictException('Email is exist');
-      }
-    }
-    const updatedData = await this.prisma.user.update({
-      where: { id },
+  async createUser(userData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    taxPin: string;
+    roleId: string;
+    password: string; // Added password field
+  }) {
+    const newUser = await prisma.user.create({
       data: {
-        ...updateUserDto,
-        password: await hash(updateUserDto.password, 10),
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        phoneNumber: userData.phoneNumber,
+        taxPin: userData.taxPin,
+        password: await hash(userData.password, 10),
+        role: {
+          connect: { id: userData.roleId },
+        },
       },
     });
-    const { password, ...result } = updatedData;
-    return result;
+
+    return newUser;
   }
 
-  async remove(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
+  async updateUser(
+    userId: string,
+    updateData: Partial<{
+      firstName: string;
+      lastName: string;
+      email: string;
+      phoneNumber: string;
+      taxPin: string;
+      roleId: string;
+    }>,
+  ) {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        firstName: updateData.firstName,
+        lastName: updateData.lastName,
+        email: updateData.email,
+        phoneNumber: updateData.phoneNumber,
+        taxPin: updateData.taxPin,
+        role: updateData.roleId
+          ? {
+              connect: { id: updateData.roleId },
+            }
+          : undefined,
+      },
     });
-    if (!user) {
-      throw new NotFoundException(`The data with id ${id} is not found`);
-    }
-    const deletedData = await this.prisma.user.delete({
-      where: { id },
+
+    return updatedUser;
+  }
+
+  async deleteUser(userId: string) {
+    await prisma.user.delete({
+      where: { id: userId },
     });
-    const { password, ...result } = deletedData;
-    return result;
+    return { message: 'User deleted successfully' };
   }
 
   async findByEmail(email: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email: email },
     });
 
@@ -188,28 +167,21 @@ export class UserService {
   }
 
   async getUserPermissions(userId: string) {
-    // Fetch user roles
-    const userRoles = await this.prisma.user_role.findMany({
-      where: {
-        userId: userId,
-      },
-      include: {
-        roles: {
-          include: {
-            role_permission: {
-              include: {
-                permissions: true,
-              },
-            },
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        role: {
+          select: {
+            permissions: true,
           },
         },
       },
     });
 
-    return userRoles.flatMap((entry) =>
-      entry.roles.role_permission.map(
-        (permission) => permission.permissions.name,
-      ),
-    );
+    return {
+      permissions: user.role.permissions, // Adding role name to the response
+    };
   }
 }
+
+export default UserService;

@@ -14,11 +14,20 @@ import { AuthModule } from './auth/auth.module';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from './auth/auth.guard';
 import { AuthMiddleware } from './auth/auth.middleware';
-import { PermissionGuard } from './auth/permission/permission.guard';
 import { UserService } from './user/user.service';
 import { PrismaService } from './prisma.service';
 import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
+import { RolesGuard } from './role/guards/roles.guard';
+import { RoleService } from './role/role.service';
+import CustomerService from './customer/customer.service';
+import { CustomerModule } from './customer/customer.module';
+import TaskService from './task/task.service';
+import { TaskModule } from './task/task.module';
+import { ProjectModule } from './project/project.module';
+import ProjectService from './project/project.service';
+import LeadService from './lead/lead.service';
+import { LeadModule } from './lead/lead.module';
 
 @Module({
   imports: [
@@ -29,6 +38,10 @@ import { PermissionModule } from './permission/permission.module';
     UserModule,
     AuthModule,
     RoleModule,
+    CustomerModule,
+    ProjectModule,
+    TaskModule,
+    LeadModule,
     PermissionModule,
   ],
   controllers: [AppController],
@@ -44,10 +57,15 @@ import { PermissionModule } from './permission/permission.module';
     },
     {
       provide: APP_GUARD,
-      useClass: PermissionGuard,
+      useClass: RolesGuard,
     },
     JwtService,
     UserService,
+    RoleService,
+    CustomerService,
+    ProjectService,
+    TaskService,
+    LeadService,
     PrismaService,
   ],
 })

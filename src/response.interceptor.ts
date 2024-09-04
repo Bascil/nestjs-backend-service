@@ -11,10 +11,22 @@ import { map } from 'rxjs/operators';
 export class ResponseInterceptor<T> implements NestInterceptor<T, any> {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      map((data) => ({
-        statusCode: context.switchToHttp().getResponse().statusCode,
-        data,
-      })),
+      map((response) => {
+        const statusCode = context.switchToHttp().getResponse().statusCode;
+
+        // Check if the response has 'data' and 'meta' fields
+        if (response && response.data && response.meta) {
+          return {
+            data: response.data,
+            meta: response.meta,
+          };
+        }
+
+        // Default fallback for other types of responses
+        return {
+          data: response,
+        };
+      }),
     );
   }
 }

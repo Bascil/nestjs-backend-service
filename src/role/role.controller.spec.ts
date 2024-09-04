@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RoleController } from './role.controller';
 import { RoleService } from './role.service';
+import { PrismaService } from '../prisma.service';
+import UserService from '../user/user.service';
 
 describe('RoleController', () => {
   let controller: RoleController;
@@ -8,7 +10,7 @@ describe('RoleController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RoleController],
-      providers: [RoleService],
+      providers: [PrismaService, UserService, RoleService],
     }).compile();
 
     controller = module.get<RoleController>(RoleController);

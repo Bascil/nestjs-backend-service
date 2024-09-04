@@ -6,11 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Permission } from '../auth/permission/permission.decorator';
+import { RolesGuard } from '../role/guards/roles.guard';
+import { Roles } from '../role/role.decorator';
+import { Role } from '../role/enums/role.enum';
 
 @Controller({
   path: 'users',
@@ -20,38 +24,37 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @Permission('manage_system')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
   create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+    return this.userService.createUser(createUserDto);
   }
 
   @Get()
-  @Permission('manage_system')
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get('permission/:id')
-  @Permission('manage_system')
-  permissin(@Param('id') id: string) {
-    return this.userService.getUserPermissions(id);
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin, Role.Manager)
+  findAll(@Query('page') page = 1, @Query('perPage') limit = 10) {
+    return this.userService.findAll(page, limit);
   }
 
   @Get(':id')
-  @Permission('manage_system')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin, Role.Manager)
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+    return this.userService.getUserById(id);
   }
 
   @Patch(':id')
-  @Permission('manage_system')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin, Role.Manager)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+    return this.userService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id')
-  @Permission('manage_system')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin, Role.Manager)
   remove(@Param('id') id: string) {
-    return this.userService.remove(id);
+    return this.userService.deleteUser(id);
   }
 }
