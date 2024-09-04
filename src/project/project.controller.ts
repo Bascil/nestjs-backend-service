@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Put,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -44,7 +45,7 @@ export class ProjectController {
     return this.projectService.getProjectById(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.Admin, Role.Manager, Role.Engineer)
   update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {

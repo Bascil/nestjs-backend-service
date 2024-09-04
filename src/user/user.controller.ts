@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -44,7 +45,7 @@ export class UserController {
     return this.userService.getUserById(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.Admin, Role.Manager)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {

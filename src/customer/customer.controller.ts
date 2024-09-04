@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Put,
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
@@ -44,7 +45,7 @@ export class CustomerController {
     return this.customerService.getCustomerById(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.Admin, Role.Manager)
   update(

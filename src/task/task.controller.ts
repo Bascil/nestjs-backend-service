@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Put,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -44,7 +45,7 @@ export class TaskController {
     return this.taskService.getTaskById(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.Admin, Role.Manager, Role.Engineer)
   update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {

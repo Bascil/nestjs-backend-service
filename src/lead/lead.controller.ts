@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Put,
 } from '@nestjs/common';
 import { LeadService } from './lead.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
@@ -44,7 +45,7 @@ export class LeadController {
     return this.leadService.getLeadById(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.Admin, Role.Manager)
   update(@Param('id') id: string, @Body() updateLeadDto: UpdateLeadDto) {
