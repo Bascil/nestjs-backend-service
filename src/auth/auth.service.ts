@@ -20,7 +20,7 @@ export class AuthService {
   ) {}
 
   async login(authDto: AuthDto) {
-    const user = await this.userService.findByEmail(authDto.email);
+    const user = await this.userService.getUserByEmail(authDto.email);
     if (user && (await compare(authDto.password, user.password))) {
       const payload = { sub: user.id, username: user.email };
       const { password, ...result } = user;

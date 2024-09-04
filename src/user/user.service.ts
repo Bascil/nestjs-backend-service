@@ -158,6 +158,43 @@ export class UserService {
     return { message: 'User deleted successfully' };
   }
 
+  async getUserByEmail(email: string) {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        password: true,
+        phoneNumber: true,
+        taxPin: true,
+        role: {
+          select: {
+            id: true,
+            name: true, // Including role name
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      password: user.password,
+      phoneNumber: user.phoneNumber,
+      taxPin: user.taxPin,
+      roleId: user.role.id,
+      roleName: user.role.name, // Adding role name to the response
+    };
+  }
+
   async findByEmail(email: string) {
     const user = await prisma.user.findUnique({
       where: { email: email },
