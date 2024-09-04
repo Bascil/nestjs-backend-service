@@ -16,7 +16,7 @@ describe('ProjectController', () => {
     controller = module.get<ProjectController>(ProjectController);
   });
 
-  it('should be defined', () => {
+  it('shouldbe defined', () => {
     expect(controller).toBeDefined();
   });
 });
