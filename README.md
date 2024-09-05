@@ -73,13 +73,7 @@ $ npm run start:prod
 
 ## 1. Login
 
-### Description:
-
 Authenticate by providing `username` and `password`. This endpoint does not require a bearer token.
-
-### Endpoint:
-
-### Example Request:
 
 ```bash
 curl -X POST http://localhost:PORT/api/v1/login \
