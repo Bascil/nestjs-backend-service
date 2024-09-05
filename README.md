@@ -69,6 +69,64 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+### Endpoints
+
+## 1. Login
+
+### Description:
+
+Authenticate by providing `username` and `password`. This endpoint does not require a bearer token.
+
+### Endpoint:
+
+### Example Request:
+
+```bash
+curl -X POST http://localhost:PORT/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "your_username",
+    "password": "your_password"
+  }'
+```
+
+## 2. Extra Endpoints(GET, POST, PUT, DELETE)
+
+1. Get Users
+
+```
+curl -X GET http://localhost:PORT/api/v1/users \
+  -H "Authorization: Bearer your_token"
+```
+
+2. Get Projects
+
+```
+curl -X GET http://localhost:PORT/api/v1/projects \
+  -H "Authorization: Bearer your_token"
+```
+
+3. Get Tasks
+
+```
+curl -X GET http://localhost:PORT/api/v1/tasks \
+  -H "Authorization: Bearer your_token"
+```
+
+4. Get Leads
+
+```
+curl -X GET http://localhost:PORT/api/v1/leads \
+  -H "Authorization: Bearer your_token"
+```
+
+5. Get Customers
+
+```
+curl -X GET http://localhost:PORT/api/v1/customers \
+  -H "Authorization: Bearer your_token"
+```
+
 ## Test
 
 ```bash
