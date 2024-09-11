@@ -47,7 +47,7 @@ steps:
       - '--port'
       - '3000'
       - '--min-instances'
-      - '1'
+      - '0'
       - '--max-instances'
       - '1'
       - '--memory'
